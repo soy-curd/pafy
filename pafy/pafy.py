@@ -544,6 +544,17 @@ class Stream(object):
             outfh.close()
             return temp_filepath
 
+    def open_url(self, f):
+        def wrapper(*args, **kwargs):
+            pos = kwargs['pos']
+            resuming_opener = build_opener()
+            resuming_opener.addheaders = [('User-Agent', g.user_agent),
+                                          ("Range", "bytes=%s-" % pos)]
+            with resuming_opener.open(self.url) as fin:
+                return f(*args, fp=fin)
+
+        return wrapper
+
 
 class Pafy(object):
 
