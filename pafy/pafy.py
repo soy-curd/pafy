@@ -447,7 +447,7 @@ class Stream(object):
             return True
 
     def download(self, filepath="", quiet=False, callback=lambda *x: None,
-                 meta=False, remux_audio=False):
+                 meta=False, remux_audio=False, offset=0, partial=False, size=16384):
         """ Download.  Use quiet=True to supress output. Return filename.
 
         Use meta=True to append video id and itag to generated filename
@@ -479,9 +479,9 @@ class Stream(object):
 
         response = g.opener.open(self.url)
         total = int(response.info()['Content-Length'].strip())
-        chunksize, bytesdone, t0 = 16384, 0, time.time()
+        chunksize, bytesdone, t0 = size, 0, time.time()
 
-        fmode, offset = "wb", 0
+        fmode= "wb"
 
         if os.path.exists(temp_filepath):
             if os.stat(temp_filepath).st_size < total:
@@ -525,6 +525,10 @@ class Stream(object):
 
             if callback:
                 callback(total, *progress_stats)
+
+            if partial:
+                outfh.close()
+                break
 
         if self._active:
 
